@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import com.cg.employeepayrollapp.dto.EmployeePayrollDTO;
+import com.cg.employeepayrollapp.exceptions.EmployeePayrollException;
 import com.cg.employeepayrollapp.model.EmployeePayrollData;
 
 @Service
 public class EmployeePayrollService implements IEmployeePayrollService {
-	private List<EmployeePayrollData> empPayrollList=new ArrayList<>();
-	
+	private List<EmployeePayrollData> empPayrollList = new ArrayList<>();
+
 	@Override
 	public List<EmployeePayrollData> getEmployeePayrollData() {
 		return empPayrollList;
@@ -17,13 +18,14 @@ public class EmployeePayrollService implements IEmployeePayrollService {
 
 	@Override
 	public EmployeePayrollData getEmployeePayrollData(int empId) {
-		return empPayrollList.get(empId-1);
+		return empPayrollList.stream().filter(empData -> empData.getEmployeeId() == empId).findFirst()
+				.orElseThrow(() -> new EmployeePayrollException("Employee ID Not Found"));
 	}
 
 	@Override
 	public EmployeePayrollData createEmployeePayrollData(EmployeePayrollDTO empPayrollDTO) {
 		EmployeePayrollData empData = null;
-		empData = new EmployeePayrollData(empPayrollList.size()+1, empPayrollDTO);
+		empData = new EmployeePayrollData(empPayrollList.size() + 1, empPayrollDTO);
 		empPayrollList.add(empData);
 		return empData;
 	}
@@ -33,12 +35,12 @@ public class EmployeePayrollService implements IEmployeePayrollService {
 		EmployeePayrollData empData = this.getEmployeePayrollData(empId);
 		empData.setName(empPayrollDTO.name);
 		empData.setSalary(empPayrollDTO.salary);
-		empPayrollList.set(empId-1, empData);
+		empPayrollList.set(empId - 1, empData);
 		return empData;
 	}
 
 	@Override
 	public void deleteEmployeePayrollData(int empId) {
-		empPayrollList.remove(empId-1);
+		empPayrollList.remove(empId - 1);
 	}
 }
