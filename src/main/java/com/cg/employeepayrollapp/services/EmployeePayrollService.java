@@ -2,6 +2,7 @@ package com.cg.employeepayrollapp.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,13 +24,18 @@ public class EmployeePayrollService implements IEmployeePayrollService {
 
 	@Override
 	public List<EmployeePayrollData> getEmployeePayrollData() {
-		return empPayrollList;
+		return employeeRepository.findAll();
 	}
 
 	@Override
 	public EmployeePayrollData getEmployeePayrollData(int empId) {
-		return empPayrollList.stream().filter(empData -> empData.getEmployeeId() == empId).findFirst()
-				.orElseThrow(() -> new EmployeePayrollException("Employee ID Not Found"));
+		EmployeePayrollData empData = null;
+		Optional<EmployeePayrollData> empDataById = employeeRepository.findById(empId);
+		if (empDataById.isPresent())
+			empData = empDataById.get();
+		else
+			throw new EmployeePayrollException("Employee Not Found");
+		return empData;
 	}
 
 	@Override
@@ -37,7 +43,6 @@ public class EmployeePayrollService implements IEmployeePayrollService {
 		EmployeePayrollData empData = null;
 		empData = new EmployeePayrollData(empPayrollList.size() + 1, empPayrollDTO);
 		log.debug("Employee Data: " + empData.toString());
-		empPayrollList.add(empData);
 		return employeeRepository.save(empData);
 	}
 
@@ -46,12 +51,16 @@ public class EmployeePayrollService implements IEmployeePayrollService {
 		EmployeePayrollData empData = this.getEmployeePayrollData(empId);
 		empData.setName(empPayrollDTO.name);
 		empData.setSalary(empPayrollDTO.salary);
-		empPayrollList.set(empId - 1, empData);
-		return empData;
+		empData.setGender(empPayrollDTO.gender);
+		empData.setNote(empPayrollDTO.note);
+		empData.setProfilePic(empPayrollDTO.profilePic);
+		empData.setStartDate(empPayrollDTO.startDate);
+		empData.setDepartments(empPayrollDTO.department);
+		return employeeRepository.save(empData);
 	}
 
 	@Override
 	public void deleteEmployeePayrollData(int empId) {
-		empPayrollList.remove(empId - 1);
+		employeeRepository.deleteById(empId);
 	}
 }
