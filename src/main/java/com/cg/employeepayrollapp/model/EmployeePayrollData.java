@@ -2,9 +2,7 @@ package com.cg.employeepayrollapp.model;
 
 import java.time.LocalDate;
 import java.util.List;
-
 import com.cg.employeepayrollapp.dto.EmployeePayrollDTO;
-
 import lombok.Data;
 
 public @Data class EmployeePayrollData {
